@@ -108,42 +108,21 @@ class Snake extends Grid {
         this.#clear();
         this.#update();
     }
-    #noWallMode = () => {
+    #noWallMode = () => {        
         let { cell, row } = this.#snake[0];
-        if (cell <= 0) {
-            cell = this.gridCount;
-            return {cell, row}
-        } else if (cell >= this.gridCount) {
-            cell = 0;
-            return {cell, row}
+        if (cell === 0 && this.direction === D.LEFT) {
+            return {cell: this.gridCount, row}
+        } else if (cell === this.gridCount - 1 && this.direction === D.RIGHT) {
+            return {cell: -1, row}
         }
-        if (row <= 0) {
-            row = this.gridCount;
-            return {cell, row}
-        } else if (row >= this.gridCount) {
-            row = 0;
-            return {cell, row}
+        console.log(row)
+        if (row === 0 && this.direction === D.UP) {
+            return {cell, row: this.gridCount}
+        } else if (row === this.gridCount - 1 && this.direction === D.DOWN) {
+            return {cell, row: -1}
         }
-        console.log(cell, row)
-        return {cell, row}
-        
-        // let { cell, row } = this.#snake[0];
-        // if (cell === 0 && this.direction === D.LEFT) {
-        //     cell = this.gridCount;
-        //     return {cell, row}
-        // } else if (cell === this.gridCount && this.direction === D.RIGHT) {
-        //     cell = 0;
-        //     return {cell, row}
-        // }
-        // if (row === 0 && this.direction === D.TOP) {
-        //     row = this.gridCount;
-        //     return {cell, row}
-        // } else if (row === this.gridCount && this.direction === D.DOWN) {
-        //     row = 0;
-        //     return {cell, row}
-        // }
         // console.log(cell, row)
-        // return {cell, row}
+        return {cell, row}
     }
 
     #generateFood = () => {
