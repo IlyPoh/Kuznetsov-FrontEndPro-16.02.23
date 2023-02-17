@@ -115,7 +115,6 @@ class Snake extends Grid {
         } else if (cell === this.gridCount - 1 && this.direction === D.RIGHT) {
             return {cell: -1, row}
         }
-        console.log(row)
         if (row === 0 && this.direction === D.UP) {
             return {cell, row: this.gridCount}
         } else if (row === this.gridCount - 1 && this.direction === D.DOWN) {
