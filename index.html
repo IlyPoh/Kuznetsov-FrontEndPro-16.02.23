@@ -11,8 +11,10 @@
 </head>
 
 <body>
-    <h1 id="snake-message">Welcome to Snake !</h1>
-    <span id="snake-score">Score: <b> 0 </b></span>
+    <div class="title">
+        <h1 id="snake-message">Welcome to Snake !</h1>
+        <span id="snake-score">Score: <b> 0 </b></span>
+    </div>
     <section>
         <div class="snake-wrapper">
             <div id="snake-container">
@@ -24,17 +26,18 @@
                         <select id="stacked-state" name="speed">
                             <option value="600">Small</option>
                             <option value="300">Medium</option>
-                            <option value="200">Fast</option>
+                            <option value="200" selected>Fast</option>
                             <option value="100">Faster</option>
                             <option value="50">Extra</option>
                         </select>
                     </label>
 
-                    <label>
+                    <!-- <label>
                         <span class="label"> ... </span>
-                    </label>
+                    </label> -->
                 </form>
                 <button id="snake-start-game" class="ui green basic button">Start Game</button>
+                <button id="snake-pause-game" class="ui orange basic button">Pause</button>
                 <button id="snake-end-game" class="ui red basic button">End Game</button>
             </div>
         </div>

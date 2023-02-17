@@ -2,17 +2,35 @@ body {
     margin: 0;
     padding: 0;
     font-size: 16px;
+    background: #000;
+    color: #fff;
 }
 
 section {
     display: flex;
 }
 
-.snake-cell {
+select, option {
+    background: #000;
+    color: #fff;
+}
+
+.title {
+    text-align: center;
+}
+
+.cell {
     display: flex;
-    border: 1px solid #cccccc;
+    border: 1px solid #333;
     border-radius: 3px;
-    transition: 50ms;
+    /* transition: 50ms; */
+}
+
+.apple {
+    content: '';
+    background-image: url(/img/apple.png);
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 .snake-cell img {
@@ -20,23 +38,24 @@ section {
 }
 
 .snake-head {
-    background-color: green;
+    background-color: #34ac00;
     border-radius: 6px;
+    background-image: none;
 }
 
 .snake-body {
-    background-color: greenyellow;
+    background-color: #bada55;
 }
 
 #snake-container {
     display: flex;
     flex-wrap: wrap;
-    margin-right: 10px;
 }
 
 .snake-wrapper {
     display: flex;
     margin: auto;
+    gap: 10px;
 }
 
 .controls {

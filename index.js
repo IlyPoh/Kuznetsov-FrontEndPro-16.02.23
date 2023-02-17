@@ -1,17 +1,22 @@
 import Grid from './js/grid.js';
-import { DIRECTION as D } from './js/helpers.js';
+import { DIRECTION as D, RANDOMIZER, WORDS as W } from './js/helpers.js';
 
 class Snake extends Grid {
-    static snakeCellCssClass = 'snake-cell';
+    static сellCssClass = 'cell';
     static snakeCssClass = 'snake';
     static snakeHeadCssClass = 'snake-head';
     static snakeBodyCssClass = 'snake-body';
     static gridContainerSelector = '#snake-container';
+    static apple = 'apple';
 
     #snake = [];
-    #process = null;
+    #apples = [];
+    #working = null;
+    #generating = null;
     #speed = 0;
+    #paused = true;
     #startBtn = this.find('#snake-start-game');
+    #pauseBtn = this.find('#snake-pause-game');
     #endBtn = this.find('#snake-end-game');
     #form = this.find('#snake-controls-form');
     #messageContainer =  this.find('#snake-message');
@@ -22,7 +27,7 @@ class Snake extends Grid {
         super({
             boxSize, 
             gridCount,
-            gridCellCssClass: Snake.snakeCellCssClass,
+            gridCellCssClass: Snake.сellCssClass,
             gridContainerSelector: Snake.gridContainerSelector,
         });
         this.direction = D.LEFT;
@@ -36,6 +41,10 @@ class Snake extends Grid {
             this.#start();
         });
 
+        this.#pauseBtn.addEventListener('click', () => {
+            this.#pauseGame();
+        });
+        
         this.#endBtn.addEventListener('click', () => {
             this.#endGame();
         });
@@ -43,80 +52,127 @@ class Snake extends Grid {
         document.addEventListener('keydown', (event) => {
             this.#updateDirection(event);
         })
+
+        this.#pauseBtn.style.display = W.NONE;
+        this.#endBtn.style.display = W.NONE;
     }
 
     #start() {
         let middleCell = Math.floor(this.gridCount) / 2;
         this.#snake = this.#buildSnake(middleCell, middleCell);
         this.#speed = +this.#form.speed.value;
-        // #generateFood / place img in a random cell  Need to make sure that random cell is not body of snake
+        this.#paused = false;
 
-        // endBtn = dispay.block
-        // startBtn = dispay.none
-        // messageContainer.innerHTML = "Welcome to Snake!"
+        this.#startBtn.style.display = W.NONE;
+        this.#pauseBtn.style.display = W.BLOCK;
+        this.#endBtn.style.display = W.BLOCK;
 
-        this.#process = setInterval(()=>{
+        this.#working = setInterval(this.#process, this.#speed);
+        this.#generating = setInterval(this.#generateFood, this.#speed * 5)
+    }
+    #process = () => {
+        let { cell, row } = this.#noWallMode();
+        // let { cell, row } = this#noWallMode() - check if cell === 0 or cell === gridCount then cell = vise versa value  
 
-            let { cell, row } = this.#snake[0];
-            // let { cell, row } = this#noWallMode() - check if cell === 0 or cell === gridCount then cell = vise versa value  
+        let snakePartToShift = null;
 
-            let snakePartToShift = null;
+        switch(this.direction) {
+            case D.LEFT: {
+                snakePartToShift = {
+                    cell: cell - 1,
+                    row,
+                };
+            }; break;
+            case D.RIGHT: {
+                snakePartToShift = {
+                    cell: cell + 1,
+                    row,
+                };
+            }; break;
+            case D.UP: {
+                snakePartToShift = {
+                    cell,
+                    row: row - 1,
+                };
+            }; break;
+            case D.DOWN: {
+                snakePartToShift = {
+                    cell,
+                    row: row + 1,
+                };
+            }; break;
+        };
 
-            switch(this.direction) {
-                case D.LEFT: {
-                    snakePartToShift = {
-                        cell: cell - 1,
-                        row,
-                    };
-                }; break;
-                case D.RIGHT: {
-                    snakePartToShift = {
-                        cell: cell + 1,
-                        row,
-                    };
-                }; break;
-                case D.UP: {
-                    snakePartToShift = {
-                        cell,
-                        row: row - 1,
-                    };
-                }; break;
-                case D.DOWN: {
-                    snakePartToShift = {
-                        cell,
-                        row: row + 1,
-                    };
-                }; break;
-            };
-
-            this.#snake.unshift(snakePartToShift);
-            
-            this.#clear();
-            this.#update();
-        }, this.#speed);
-
-      
+        this.#snake.unshift(snakePartToShift);
+        
+        this.#clear();
+        this.#update();
+    }
+    #noWallMode = () => {
+        let { cell, row } = this.#snake[0];
+        if (cell <= 0) {
+            cell = this.gridCount;
+            return {cell, row}
+        } else if (cell >= this.gridCount) {
+            cell = 0;
+            return {cell, row}
+        }
+        if (row <= 0) {
+            row = this.gridCount;
+            return {cell, row}
+        } else if (row >= this.gridCount) {
+            row = 0;
+            return {cell, row}
+        }
+        console.log(cell, row)
+        return {cell, row}
+        
+        // let { cell, row } = this.#snake[0];
+        // if (cell === 0 && this.direction === D.LEFT) {
+        //     cell = this.gridCount;
+        //     return {cell, row}
+        // } else if (cell === this.gridCount && this.direction === D.RIGHT) {
+        //     cell = 0;
+        //     return {cell, row}
+        // }
+        // if (row === 0 && this.direction === D.TOP) {
+        //     row = this.gridCount;
+        //     return {cell, row}
+        // } else if (row === this.gridCount && this.direction === D.DOWN) {
+        //     row = 0;
+        //     return {cell, row}
+        // }
+        // console.log(cell, row)
+        // return {cell, row}
     }
 
+    #generateFood = () => {
+        let randomizedCell = {cell: RANDOMIZER(this.gridCount - 1), row: RANDOMIZER(this.gridCount - 1)}
+        let randomizedElement = this.#findByCoords(randomizedCell);
+        for (let i = 0; i < this.#snake.length; i++) {
+            if (this.#snake[i].cell === randomizedCell.cell && this.#snake[i].row === randomizedCell.row) {
+                this.#generateFood ()
+            }
+        }
+        randomizedElement.classList.add(W.APPLE);
+        this.#apples.push(randomizedCell);
+    }
     #clear() {
         let cells = this.find(`.${Snake.snakeCssClass}`);
 
         cells.forEach( cell => {
-            cell.className = Snake.snakeCellCssClass;
-        })
+            cell.className = Snake.сellCssClass;
+        });
     }
 
     #update() {
-        // #checkIfSnakeHasEaten() 
-        // if snake ate apple then add + 1 to score, delete apple from the cell, add  +1 {cell, row}
-        // after the snake ate the food we should re-generate random cell and add new one (so you may invoke this.#generateFood)
-
-
+        this.#checkIfSnakeHasEaten();
+        // this.#checkOnTailCrash();
         // checkOnTailCrash - if a head bump into the tail. You have to end game calling 'endGame()';
 
         this.#snake.pop();
 
-        for( let [index, snakePart] of this.#snake.entries()) {
+        for(let [index, snakePart] of this.#snake.entries()) {
             let cellElement = this.#findByCoords(snakePart);
             
             if(index === 0) {
@@ -128,6 +184,22 @@ class Snake extends Grid {
             cellElement.classList.add(Snake.snakeBodyCssClass, Snake.snakeCssClass);
         }
     }
+    #checkIfSnakeHasEaten () {
+        for (let i = 0; i < this.#apples.length; i++) {
+            if (this.#snake[0].cell === this.#apples[i].cell && this.#snake[0].row === this.#apples[i].row) {
+                this.#snake.length++
+                this.#scoreContainer.querySelector('b').innerHTML++
+                this.#apples.splice(i,1)
+            }            
+        }
+    }
+    // #checkOnTailCrash() {
+    //     for (let j = 1; j < this.#snake.length; j++) {
+    //         if (this.#snake[0].cell === this.#snake[j].cell && this.#snake[0].row === this.#snake[j].row) {
+    //             this.#endGame()
+    //         }
+    //     }
+    // }
 
     #updateDirection(event) {
         let key = event.key;
@@ -149,17 +221,36 @@ class Snake extends Grid {
 
     #buildSnake(startCell, startRow, size = 5) {
         return new Array(size).fill(null).map((_value, index) => {
-            debugger;
             return { cell: startCell + index, row: startRow };
         })
     }
 
+    #pauseGame() {
+        if (!this.#paused) {
+            clearInterval(this.#working)
+            clearInterval(this.#generating)
+            this.#paused = true;
+            this.#pauseBtn.innerHTML = W.UNPAUSE;
+            this.#messageContainer.innerHTML = W.GAMEPAUSED;
+        } else {
+            this.#working = setInterval(this.#process, this.#speed)
+            this.#generating = setInterval(this.#generateFood, this.#speed * 5)
+            this.#paused = false;
+            this.#pauseBtn.innerHTML = W.PAUSE;
+            this.#messageContainer.innerHTML = W.WELCOME;
+        }
+    }
+
     #endGame() {
-        clearInterval(this.#process);
-        // show Game over message 
-        // reset score 
+        clearInterval(this.#working);
+        clearInterval(this.#generating)
+        this.#messageContainer.innerHTML = W.GAMEOVER;
+        this.#startBtn.style.display = W.BLOCK;
+        this.#pauseBtn.style.display = W.NONE;
+        this.#endBtn.style.display = W.NONE;
+        this.#scoreContainer.querySelector('b').innerHTML = 0
+        this.#clear()
         // change button view 
-        // clear workfield - get rid of all snake parts 
         // ...
     }
 }
