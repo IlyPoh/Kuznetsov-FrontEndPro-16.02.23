@@ -1,5 +1,5 @@
 import Grid from './js/grid.js';
-import { DIRECTION as D, RANDOMIZER, WORDS as W } from './js/helpers.js';
+import { DIRECTION as D, WORDS as W , RANDOMIZER} from './js/helpers.js';
 
 class Snake extends Grid {
     static сellCssClass = 'cell';
@@ -72,7 +72,6 @@ class Snake extends Grid {
     }
     #process = () => {
         let { cell, row } = this.#noWallMode();
-        // let { cell, row } = this#noWallMode() - check if cell === 0 or cell === gridCount then cell = vise versa value  
 
         let snakePartToShift = null;
 
@@ -128,12 +127,14 @@ class Snake extends Grid {
         let randomizedElement = this.#findByCoords(randomizedCell);
         for (let i = 0; i < this.#snake.length; i++) {
             if (this.#snake[i].cell === randomizedCell.cell && this.#snake[i].row === randomizedCell.row) {
-                this.#generateFood ()
+                this.#generateFood();
+                return;
             }
         }
         randomizedElement.classList.add(W.APPLE);
         this.#apples.push(randomizedCell);
     }
+
     #clear() {
         let cells = this.find(`.${Snake.snakeCssClass}`);
 
@@ -141,11 +142,19 @@ class Snake extends Grid {
             cell.className = Snake.сellCssClass;
         });
     }
+    
+    #clearApple() {
+        let cells = document.querySelectorAll(`.${Snake.apple}`)
+
+        cells.forEach( cell => {
+            cell.className = Snake.сellCssClass;
+        });
+        this.#apples = [];
+    }
 
     #update() {
-        this.#checkIfSnakeHasEaten();
         // this.#checkOnTailCrash();
-        // checkOnTailCrash - if a head bump into the tail. You have to end game calling 'endGame()';
+        this.#checkIfSnakeHasEaten();
 
         this.#snake.pop();
 
@@ -166,17 +175,17 @@ class Snake extends Grid {
             if (this.#snake[0].cell === this.#apples[i].cell && this.#snake[0].row === this.#apples[i].row) {
                 this.#snake.length++
                 this.#scoreContainer.querySelector('b').innerHTML++
-                this.#apples.splice(i,1)
+                this.#apples.splice(i, 1)
             }            
         }
     }
-    // #checkOnTailCrash() {
-    //     for (let j = 1; j < this.#snake.length; j++) {
-    //         if (this.#snake[0].cell === this.#snake[j].cell && this.#snake[0].row === this.#snake[j].row) {
-    //             this.#endGame()
-    //         }
-    //     }
-    // }
+    #checkOnTailCrash() {
+        for (let j = 1; j < this.#snake.length; j++) {
+            if (this.#snake[0].cell === this.#snake[j].cell && this.#snake[0].row === this.#snake[j].row) {
+                this.#endGame()
+            }
+        }
+    }
 
     #updateDirection(event) {
         let key = event.key;
@@ -220,15 +229,14 @@ class Snake extends Grid {
 
     #endGame() {
         clearInterval(this.#working);
-        clearInterval(this.#generating)
+        clearInterval(this.#generating);
         this.#messageContainer.innerHTML = W.GAMEOVER;
         this.#startBtn.style.display = W.BLOCK;
         this.#pauseBtn.style.display = W.NONE;
         this.#endBtn.style.display = W.NONE;
-        this.#scoreContainer.querySelector('b').innerHTML = 0
-        this.#clear()
-        // change button view 
-        // ...
+        this.#scoreContainer.querySelector('b').innerHTML = 0;
+        this.#clear();
+        this.#clearApple();
     }
 }
 
