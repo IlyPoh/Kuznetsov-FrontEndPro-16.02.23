@@ -14,6 +14,7 @@ class Snake extends Grid {
     #working = null;
     #generating = null;
     #speed = 0;
+    #appleSpeed = 0;
     #paused = true;
     #startBtn = this.find('#snake-start-game');
     #pauseBtn = this.find('#snake-pause-game');
@@ -61,14 +62,17 @@ class Snake extends Grid {
         let middleCell = Math.floor(this.gridCount) / 2;
         this.#snake = this.#buildSnake(middleCell, middleCell);
         this.#speed = +this.#form.speed.value;
+        this.#appleSpeed = this.#speed * 20;
         this.#paused = false;
+        this.direction = D.LEFT;
 
         this.#startBtn.style.display = W.NONE;
         this.#pauseBtn.style.display = W.BLOCK;
         this.#endBtn.style.display = W.BLOCK;
 
         this.#working = setInterval(this.#process, this.#speed);
-        this.#generating = setInterval(this.#generateFood, this.#speed * 5)
+        this.#generating = setInterval(this.#generateFood, this.#appleSpeed)
+        this.#generateFood()
     }
     #process = () => {
         let { cell, row } = this.#noWallMode();
@@ -115,9 +119,9 @@ class Snake extends Grid {
             return {cell: -1, row}
         }
         if (row === 0 && this.direction === D.UP) {
-            return {cell, row: this.gridCount}
+            return {row: this.gridCount, cell}
         } else if (row === this.gridCount - 1 && this.direction === D.DOWN) {
-            return {cell, row: -1}
+            return {row: -1, cell}
         }
         return {cell, row}
     }
@@ -153,7 +157,7 @@ class Snake extends Grid {
     }
 
     #update() {
-        // this.#checkOnTailCrash();
+        this.#checkOnTailCrash();
         this.#checkIfSnakeHasEaten();
 
         this.#snake.pop();
@@ -178,6 +182,7 @@ class Snake extends Grid {
                 this.#apples.splice(i, 1)
             }            
         }
+        return this.#snake
     }
     #checkOnTailCrash() {
         for (let j = 1; j < this.#snake.length; j++) {
@@ -185,6 +190,7 @@ class Snake extends Grid {
                 this.#endGame()
             }
         }
+        return this.#snake
     }
 
     #updateDirection(event) {
