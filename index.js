@@ -69,6 +69,7 @@ class Snake extends Grid {
         this.#startBtn.style.display = W.NONE;
         this.#pauseBtn.style.display = W.BLOCK;
         this.#endBtn.style.display = W.BLOCK;
+        this.#messageContainer.innerHTML = W.WELCOME;
 
         this.#working = setInterval(this.#process, this.#speed);
         this.#generating = setInterval(this.#generateFood, this.#appleSpeed)
