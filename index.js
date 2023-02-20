@@ -131,7 +131,7 @@ class Snake extends Grid {
         let randomizedCell = {cell: RANDOMIZER(this.gridCount - 1), row: RANDOMIZER(this.gridCount - 1)}
         let randomizedElement = this.#findByCoords(randomizedCell);
         for (let i = 0; i < this.#snake.length; i++) {
-            if (this.#snake[i].cell === randomizedCell.cell && this.#snake[i].row === randomizedCell.row) {
+            if (this.#comparingCoords(this.#snake[i], randomizedCell)) {
                 this.#generateFood();
                 return;
             }
@@ -177,7 +177,7 @@ class Snake extends Grid {
     }
     #checkIfSnakeHasEaten () {
         for (let i = 0; i < this.#apples.length; i++) {
-            if (this.#snake[0].cell === this.#apples[i].cell && this.#snake[0].row === this.#apples[i].row) {
+            if (this.#comparingCoords(this.#snake[0], this.#apples[i])) {
                 this.#snake.length++
                 this.#scoreContainer.querySelector('b').innerHTML++
                 this.#apples.splice(i, 1)
@@ -187,7 +187,7 @@ class Snake extends Grid {
     }
     #checkOnTailCrash() {
         for (let j = 1; j < this.#snake.length; j++) {
-            if (this.#snake[0].cell === this.#snake[j].cell && this.#snake[0].row === this.#snake[j].row) {
+            if (this.#comparingCoords(this.#snake[0], this.#snake[j])) {
                 this.#endGame()
             }
         }
@@ -218,6 +218,10 @@ class Snake extends Grid {
         })
     }
 
+    #comparingCoords(firstObject, secondObject) {
+        return firstObject.cell === secondObject.cell && firstObject.row === secondObject.row;
+    }
+    
     #pauseGame() {
         if (!this.#paused) {
             clearInterval(this.#working)
