@@ -17,6 +17,7 @@ class Snake extends Grid {
     #appleSpeed = 0;
     #score = 0;
     #paused = true;
+    #running = false;
     #startBtn = this.find('#snake-start-game');
     #pauseBtn = this.find('#snake-pause-game');
     #endBtn = this.find('#snake-end-game');
@@ -65,16 +66,13 @@ class Snake extends Grid {
         this.#speed = +this.#form.speed.value;
         this.#appleSpeed = this.#speed * 20;
         this.#paused = false;
+        this.#running = true;
         this.direction = D.LEFT;
-
-        this.#startBtn.style.display = W.NONE;
-        this.#pauseBtn.style.display = W.BLOCK;
-        this.#endBtn.style.display = W.BLOCK;
-        this.#messageContainer.innerHTML = W.WELCOME;
 
         this.#working = setInterval(this.#process, this.#speed);
         this.#generating = setInterval(this.#generateFood, this.#appleSpeed)
-        this.#generateFood()
+        this.#generateFood();
+        this.#checkRunning();
     }
     #process = () => {
         let { cell, row } = this.#noWallMode();
@@ -112,7 +110,9 @@ class Snake extends Grid {
         
         this.#clear();
         this.#update();
+        this.#checkRunning();
     }
+
     #noWallMode = () => {        
         let { cell, row } = this.#snake[0];
         if (cell === 0 && this.direction === D.LEFT) {
@@ -126,6 +126,24 @@ class Snake extends Grid {
             return {row: -1, cell}
         }
         return {cell, row}
+    }
+
+    #checkRunning() {
+        if (this.#running) {
+            this.#startBtn.style.display = W.NONE;
+            this.#pauseBtn.style.display = W.BLOCK;
+            this.#pauseBtn.innerHTML = W.PAUSE;
+            this.#endBtn.style.display = W.BLOCK;
+            this.#messageContainer.innerHTML = W.WELCOME;
+        } else if(!this.#running && this.#paused) {
+            this.#pauseBtn.innerHTML = W.UNPAUSE;
+            this.#messageContainer.innerHTML = W.GAMEPAUSED;
+        } else {
+            this.#messageContainer.innerHTML = W.GAMEOVER;
+            this.#startBtn.style.display = W.BLOCK;
+            this.#pauseBtn.style.display = W.NONE;
+            this.#endBtn.style.display = W.NONE;
+        }
     }
 
     #generateFood = () => {
@@ -229,28 +247,26 @@ class Snake extends Grid {
             clearInterval(this.#working)
             clearInterval(this.#generating)
             this.#paused = true;
-            this.#pauseBtn.innerHTML = W.UNPAUSE;
-            this.#messageContainer.innerHTML = W.GAMEPAUSED;
+            this.#running = false;
+            this.#checkRunning();
         } else {
             this.#working = setInterval(this.#process, this.#speed)
             this.#generating = setInterval(this.#generateFood, this.#appleSpeed)
             this.#paused = false;
-            this.#pauseBtn.innerHTML = W.PAUSE;
-            this.#messageContainer.innerHTML = W.WELCOME;
+            this.#running = true;
         }
     }
 
     #endGame() {
         clearInterval(this.#working);
         clearInterval(this.#generating);
-        this.#messageContainer.innerHTML = W.GAMEOVER;
-        this.#startBtn.style.display = W.BLOCK;
-        this.#pauseBtn.style.display = W.NONE;
-        this.#endBtn.style.display = W.NONE;
         this.#score = 0;
+        this.#paused = false;
+        this.#running = false;
         this.#scoreContainer.querySelector('b').innerHTML = this.#score;
         this.#clear();
         this.#clearApple();
+        this.#checkRunning();
     }
 }
 
